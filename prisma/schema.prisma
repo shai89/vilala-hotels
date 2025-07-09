@@ -1,0 +1,254 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Owner {
+  id              String   @id @default(cuid())
+  businessName    String?  @map("business_name")
+  contactPhone    String?  @map("contact_phone")
+  contactEmail    String   @map("contact_email")
+  address         String?
+  city            String?
+  region          String?
+  description     String?
+  website         String?
+  isVerified      Boolean  @default(false) @map("is_verified")
+  profileImage    String?  @map("profile_image")
+  createdDate     DateTime @default(now()) @map("created_date")
+  updatedDate     DateTime @updatedAt @map("updated_date")
+  createdById     String   @map("created_by_id")
+  createdBy       String   @map("created_by")
+  isSample        Boolean  @default(false) @map("is_sample")
+  
+  cabins Cabin[]
+  
+  @@map("owners")
+}
+
+model Cabin {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  ownerId         String   @map("owner_id")
+  address         String?
+  city            String?
+  region          String?
+  coordinates     Json?    // {lat: number, lng: number}
+  amenities       String   // JSON string of amenity array
+  images          String   // JSON string of image array
+  rules           String?
+  checkInTime     String?  @map("check_in_time")
+  checkOutTime    String?  @map("check_out_time")
+  status          String   @default("active") // active, inactive, pending
+  priority        Int      @default(0)
+  seoTitle        String?  @map("seo_title")
+  seoDescription  String?  @map("seo_description")
+  featured        Boolean  @default(false)
+  rating          Float    @default(0)
+  maxGuests       Int      @default(2) @map("max_guests")
+  createdDate     DateTime @default(now()) @map("created_date")
+  updatedDate     DateTime @updatedAt @map("updated_date")
+  createdById     String   @map("created_by_id")
+  createdBy       String   @map("created_by")
+  isSample        Boolean  @default(false) @map("is_sample")
+  
+  owner    Owner     @relation(fields: [ownerId], references: [id])
+  rooms    Room[]
+  bookings Booking[]
+  reviews  Review[]
+  
+  @@map("cabins")
+}
+
+model Room {
+  id                String   @id @default(cuid())
+  name              String
+  cabinId           String   @map("cabin_id")
+  description       String?
+  sizeSqm           Int?     @map("size_sqm")
+  maxGuests         Int      @map("max_guests")
+  pricePerNight     Decimal  @map("price_per_night")
+  weekendPrice      Decimal? @map("weekend_price")
+  holidayPrice      Decimal? @map("holiday_price")
+  bedConfiguration  Json?    @map("bed_configuration") // {double_beds: number, single_beds: number, sofa_beds: number}
+  amenities         String   // JSON string of amenity array
+  images            String   // JSON string of image array
+  isAvailable       Boolean  @default(true) @map("is_available")
+  minimumStay       Int      @default(1) @map("minimum_stay")
+  createdDate       DateTime @default(now()) @map("created_date")
+  updatedDate       DateTime @updatedAt @map("updated_date")
+  createdById       String   @map("created_by_id")
+  createdBy         String   @map("created_by")
+  isSample          Boolean  @default(false) @map("is_sample")
+  
+  cabin    Cabin     @relation(fields: [cabinId], references: [id])
+  bookings Booking[]
+  
+  @@map("rooms")
+}
+
+model Booking {
+  id               String   @id @default(cuid())
+  roomId           String   @map("room_id")
+  cabinId          String   @map("cabin_id")
+  guestName        String   @map("guest_name")
+  guestEmail       String   @map("guest_email")
+  guestPhone       String?  @map("guest_phone")
+  checkInDate      DateTime @map("check_in_date")
+  checkOutDate     DateTime @map("check_out_date")
+  numberOfGuests   Int      @map("number_of_guests")
+  totalPrice       Decimal  @map("total_price")
+  status           String   @default("pending") // pending, confirmed, cancelled, completed
+  specialRequests  String?  @map("special_requests")
+  paymentStatus    String   @default("pending") @map("payment_status") // pending, paid, refunded
+  bookingSource    String?  @map("booking_source") // website, phone, email
+  createdDate      DateTime @default(now()) @map("created_date")
+  updatedDate      DateTime @updatedAt @map("updated_date")
+  createdById      String   @map("created_by_id")
+  createdBy        String   @map("created_by")
+  isSample         Boolean  @default(false) @map("is_sample")
+  
+  room  Room  @relation(fields: [roomId], references: [id])
+  cabin Cabin @relation(fields: [cabinId], references: [id])
+  
+  @@map("bookings")
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  cabinId      String   @map("cabin_id")
+  guestName    String   @map("guest_name")
+  guestEmail   String   @map("guest_email")
+  rating       Int      // 1-5 stars
+  title        String?
+  content      String?
+  stayDate     DateTime @map("stay_date")
+  isVerified   Boolean  @default(false) @map("is_verified")
+  isApproved   Boolean  @default(false) @map("is_approved")
+  createdDate  DateTime @default(now()) @map("created_date")
+  updatedDate  DateTime @updatedAt @map("updated_date")
+  createdById  String   @map("created_by_id")
+  createdBy    String   @map("created_by")
+  isSample     Boolean  @default(false) @map("is_sample")
+  
+  cabin Cabin @relation(fields: [cabinId], references: [id])
+  
+  @@map("reviews")
+}
+
+model Article {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  content      String
+  excerpt      String?
+  featuredImage String? @map("featured_image")
+  published    Boolean  @default(false)
+  publishedAt  DateTime? @map("published_at")
+  tags         String   // JSON string of tag array
+  authorId     String   @map("author_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  author User @relation(fields: [authorId], references: [id])
+  
+  @@map("articles")
+}
+
+model AppSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  type        String   @default("string") // string, number, boolean, json
+  createdDate DateTime @default(now()) @map("created_date")
+  updatedDate DateTime @updatedAt @map("updated_date")
+  
+  @@map("app_settings")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  hashedPassword String @map("hashed_password")
+  name         String?
+  role         String   @default("admin") // admin, super_admin, editor
+  isActive     Boolean  @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdDate  DateTime @default(now()) @map("created_date")
+  updatedDate  DateTime @updatedAt @map("updated_date")
+  
+  @@map("admin_users")
+}
+
+// NextAuth.js models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("regular") // admin, regular, cabin-owner
+  phone         String?
+  location      String?
+  category      String?
+  birthDate     String?
+  status        String?
+  accounts      Account[]
+  sessions      Session[]
+  articles      Article[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
