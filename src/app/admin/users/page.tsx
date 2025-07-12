@@ -2,7 +2,7 @@ import { getUsers } from '@/lib/actions/users';
 import { UsersClient } from './users-client';
 
 export default async function UsersManagementPage() {
-  let users = [];
+  let users: any[] = [];
   
   try {
     users = await getUsers();

@@ -21,19 +21,18 @@ export async function GET(request: NextRequest) {
         email: true,
         image: true,
         emailVerified: true,
-        createdAt: true,
+        role: true,
       },
       orderBy: {
-        createdAt: 'desc'
+        id: 'desc'
       }
     })
 
-    // Add mock role and status for now
+    // Add mock status for now
     const usersWithRoles = users.map(user => ({
       ...user,
-      role: user.email === session.user?.email ? 'מנהל' : 'משתמש',
       status: 'פעיל',
-      joinDate: user.createdAt.toLocaleDateString('he-IL')
+      joinDate: new Date(parseInt(user.id.substring(0, 8), 16) * 1000).toLocaleDateString('he-IL')
     }))
 
     return NextResponse.json({ users: usersWithRoles })

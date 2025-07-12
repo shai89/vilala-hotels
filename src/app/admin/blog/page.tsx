@@ -2,7 +2,7 @@ import { getArticles } from '@/lib/actions/blog';
 import { BlogClient } from './blog-client';
 
 export default async function BlogManagementPage() {
-  let articles = [];
+  let articles: any[] = [];
   
   try {
     articles = await getArticles();

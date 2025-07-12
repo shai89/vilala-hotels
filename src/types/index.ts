@@ -43,41 +43,68 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-export interface CabinWithRooms {
+export interface Cabin {
   id: string;
   name: string;
   slug: string;
   description: string | null;
-  address: string | null;
+  address?: string | null;
   city: string | null;
   region: string | null;
-  coordinates: Coordinates | null;
+  coordinates?: Coordinates | null;
   amenities: string[];
   images: ImageObject[];
-  rules: string | null;
+  rules?: string | null;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: string;
+  status?: string;
   featured: boolean;
+  rating: number;
+  maxGuests: number;
+  rooms?: {
+    id: string;
+    name: string;
+    description?: string | null;
+    maxGuests: number;
+    pricePerNight: number;
+    weekendPrice?: number | null;
+    holidayPrice?: number | null;
+    amenities: string[];
+    images?: ImageObject[];
+    isAvailable?: boolean;
+    minimumStay?: number;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  featuredImage: string | null;
+  published: boolean;
+  publishedAt: string | null;
+  tags: string[];
+  author?: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CabinWithRooms extends Cabin {
   owner: {
     id: string;
     businessName: string | null;
     contactPhone: string | null;
     contactEmail: string;
   };
-  rooms: {
-    id: string;
-    name: string;
-    description: string | null;
-    maxGuests: number;
-    pricePerNight: number;
-    weekendPrice: number | null;
-    holidayPrice: number | null;
-    amenities: string[];
-    images: ImageObject[];
-    isAvailable: boolean;
-    minimumStay: number;
-  }[];
   reviews: {
     id: string;
     rating: number;

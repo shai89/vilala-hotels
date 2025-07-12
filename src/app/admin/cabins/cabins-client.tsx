@@ -201,7 +201,9 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
 
         {/* Cabins Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCabins.map((cabin) => (
+          {filteredCabins.map((cabin, index) => {
+            console.log(`Cabin ${index}: ID = ${cabin.id}, Name = ${cabin.name}`)
+            return (
             <div key={cabin.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
               {/* Cabin Image */}
               <div className="relative h-48 bg-gray-200">
@@ -264,7 +266,12 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                     <Link
                       href={`/admin/cabins/${cabin.id}/edit`}
                       className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="עריכת צימר"
+                      title={`עריכת צימר - ID: ${cabin.id}`}
+                      onClick={() => {
+                        console.log('Edit cabin with ID:', cabin.id)
+                        console.log('Edit cabin object:', cabin)
+                        console.log('Generated URL:', `/admin/cabins/${cabin.id}/edit`)
+                      }}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -286,7 +293,8 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         {filteredCabins.length === 0 && (

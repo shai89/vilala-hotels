@@ -180,11 +180,29 @@ export async function createCabin(data: any) {
         checkOutTime: data.checkOutTime,
         maxGuests: data.maxGuests,
         amenities: JSON.stringify(data.amenities || []),
+        images: JSON.stringify([]),
         featured: data.featured || false,
-        rating: data.rating || 0
+        rating: data.rating || 0,
+        ownerId: 'default-owner',
+        createdById: 'system',
+        createdBy: 'system'
       },
-      include: {
-        rooms: true,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        city: true,
+        region: true,
+        checkInTime: true,
+        checkOutTime: true,
+        maxGuests: true,
+        amenities: true,
+        featured: true,
+        rating: true,
+        images: true,
+        createdDate: true,
+        updatedDate: true,
       }
     })
 
@@ -205,8 +223,10 @@ export async function createCabin(data: any) {
           : newCabin.amenities || [],
         featured: newCabin.featured,
         rating: newCabin.rating,
-        images: newCabin.images || [],
-        rooms: newCabin.rooms || [],
+        images: typeof newCabin.images === 'string' 
+          ? JSON.parse(newCabin.images) 
+          : newCabin.images || [],
+        rooms: [],
         createdAt: newCabin.createdDate.toISOString(),
         updatedAt: newCabin.updatedDate.toISOString()
       }

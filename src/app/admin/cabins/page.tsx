@@ -2,7 +2,7 @@ import { getCabins } from '@/lib/actions/cabins';
 import { CabinsClient } from './cabins-client';
 
 export default async function CabinManagementPage() {
-  let cabins = [];
+  let cabins: any[] = [];
   
   try {
     cabins = await getCabins();
