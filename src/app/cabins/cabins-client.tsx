@@ -9,11 +9,11 @@ interface Cabin {
   id: string
   name: string
   slug: string
-  description: string
-  city: string
-  region: string
-  checkInTime: string
-  checkOutTime: string
+  description: string | null
+  city: string | null
+  region: string | null
+  checkInTime: string | null
+  checkOutTime: string | null
   maxGuests: number
   amenities: string[]
   featured: boolean
@@ -78,7 +78,7 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
     if (searchTerm) {
       filtered = filtered.filter(cabin => 
         cabin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cabin.city.toLowerCase().includes(searchTerm.toLowerCase())
+        (cabin.city && cabin.city.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     }
 

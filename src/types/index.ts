@@ -87,7 +87,7 @@ export interface Article {
   featuredImage: string | null;
   published: boolean;
   publishedAt: string | null;
-  tags: string[];
+  tags: any; // Allow any type for tags since it can be string[] or parsed JSON
   author?: {
     id: string;
     name: string | null;

@@ -9,11 +9,11 @@ interface Article {
   title: string
   slug: string
   content: string
-  excerpt: string
+  excerpt: string | null
   featuredImage: string | null
   published: boolean
   publishedAt: string | null
-  tags: string[]
+  tags: string[] | any
   author: {
     id: string
     name: string | null
@@ -194,7 +194,7 @@ export function EditArticleClient({ article: initialArticle }: EditArticleClient
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">תקציר המאמר</label>
                   <textarea
-                    value={article.excerpt}
+                    value={article.excerpt || ''}
                     onChange={(e) => setArticle(prev => ({ ...prev, excerpt: e.target.value }))}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none"

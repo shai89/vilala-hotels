@@ -8,11 +8,11 @@ interface Cabin {
   id: string
   name: string
   slug: string
-  description: string
-  city: string
-  region: string
-  checkInTime: string
-  checkOutTime: string
+  description: string | null
+  city: string | null
+  region: string | null
+  checkInTime: string | null
+  checkOutTime: string | null
   maxGuests: number
   amenities: string[]
   featured: boolean
@@ -27,7 +27,6 @@ interface Cabin {
     name: string
     pricePerNight: number
     maxGuests: number
-    size: number
     amenities: string[]
   }[]
   createdAt: string

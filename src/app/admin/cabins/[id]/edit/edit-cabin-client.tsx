@@ -9,11 +9,11 @@ interface Cabin {
   id: string
   name: string
   slug: string
-  description: string
-  city: string
-  region: string
-  checkInTime: string
-  checkOutTime: string
+  description: string | null
+  city: string | null
+  region: string | null
+  checkInTime: string | null
+  checkOutTime: string | null
   maxGuests: number
   amenities: string[]
   featured: boolean
@@ -157,7 +157,7 @@ export function EditCabinClient({ cabin: initialCabin }: EditCabinClientProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">עיר *</label>
                     <input
                       type="text"
-                      value={cabin.city}
+                      value={cabin.city || ''}
                       onChange={(e) => setCabin(prev => ({ ...prev, city: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                     />
@@ -165,7 +165,7 @@ export function EditCabinClient({ cabin: initialCabin }: EditCabinClientProps) {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">איזור המקרב *</label>
                     <select
-                      value={cabin.region}
+                      value={cabin.region || ''}
                       onChange={(e) => setCabin(prev => ({ ...prev, region: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
                     >
@@ -180,7 +180,7 @@ export function EditCabinClient({ cabin: initialCabin }: EditCabinClientProps) {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">תיאור הצימר</label>
                   <textarea
-                    value={cabin.description}
+                    value={cabin.description || ''}
                     onChange={(e) => setCabin(prev => ({ ...prev, description: e.target.value }))}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none"
@@ -192,7 +192,7 @@ export function EditCabinClient({ cabin: initialCabin }: EditCabinClientProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">שעת כניסה</label>
                     <input
                       type="time"
-                      value={cabin.checkInTime}
+                      value={cabin.checkInTime || ''}
                       onChange={(e) => setCabin(prev => ({ ...prev, checkInTime: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                     />
@@ -201,7 +201,7 @@ export function EditCabinClient({ cabin: initialCabin }: EditCabinClientProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">שעת יציאה</label>
                     <input
                       type="time"
-                      value={cabin.checkOutTime}
+                      value={cabin.checkOutTime || ''}
                       onChange={(e) => setCabin(prev => ({ ...prev, checkOutTime: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                     />
@@ -341,7 +341,7 @@ export function EditCabinClient({ cabin: initialCabin }: EditCabinClientProps) {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">תיאור SEO</label>
                   <textarea
-                    placeholder={cabin.description}
+                    placeholder={cabin.description || 'תיאור המקום לצורכי SEO'}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none text-sm"
                   />
