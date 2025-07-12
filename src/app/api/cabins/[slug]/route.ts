@@ -3,10 +3,11 @@ import { getCabinBySlug } from '@/lib/csvData';
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const cabin = await getCabinBySlug(params.slug);
+    const resolvedParams = await params;
+    const cabin = await getCabinBySlug(resolvedParams.slug);
 
     if (!cabin) {
       return NextResponse.json({ error: 'Cabin not found' }, { status: 404 });
