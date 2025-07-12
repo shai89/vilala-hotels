@@ -196,7 +196,7 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h3 className="font-semibold text-gray-900">{room.name}</h3>
-                          <p className="text-sm text-gray-600">עד {room.maxGuests} אורחים • {room.size} מ"ר</p>
+                          <p className="text-sm text-gray-600">עד {room.maxGuests} אורחים</p>
                         </div>
                         <div className="text-right">
                           <div className="text-xl font-bold text-purple-600">

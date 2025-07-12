@@ -67,7 +67,7 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
   const [sortBy, setSortBy] = useState('name')
 
   // Get unique regions and amenities
-  const regions = Array.from(new Set(cabins.map(cabin => cabin.region).filter(Boolean)))
+  const regions = Array.from(new Set(cabins.map(cabin => cabin.region).filter((region): region is string => Boolean(region))))
   const allAmenities = Array.from(new Set(cabins.flatMap(cabin => cabin.amenities || [])))
 
   // Filter cabins based on search criteria

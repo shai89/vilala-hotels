@@ -1,6 +1,8 @@
 import { getCabins } from '@/lib/actions/cabins';
 import { CabinsClient } from './cabins-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CabinManagementPage() {
   let cabins: any[] = [];
   

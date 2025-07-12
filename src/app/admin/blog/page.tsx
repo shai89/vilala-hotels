@@ -1,6 +1,8 @@
 import { getArticles } from '@/lib/actions/blog';
 import { BlogClient } from './blog-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function BlogManagementPage() {
   let articles: any[] = [];
   

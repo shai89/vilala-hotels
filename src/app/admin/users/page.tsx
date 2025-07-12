@@ -1,6 +1,8 @@
 import { getUsers } from '@/lib/actions/users';
 import { UsersClient } from './users-client';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UsersManagementPage() {
   let users: any[] = [];
   
