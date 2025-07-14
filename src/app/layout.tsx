@@ -29,12 +29,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
-  
+  // Don't pass server session to avoid hydration issues
   return (
     <html lang="he" dir="rtl">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <SessionProvider session={session}>
+        <SessionProvider session={null}>
           <Layout>{children}</Layout>
         </SessionProvider>
       </body>
