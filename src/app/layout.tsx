@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: "המקום הטוב ביותר למצוא צימרים, וילות ובקתות נופש בישראל. חפשו, השוו והזמינו את החופשה המושלמת שלכם.",
   keywords: ["צימרים", "חופשות", "נופש", "ישראל", "וילות", "בקתות"],
   authors: [{ name: "Vilala Team" }],
-  robots: "index, follow",
+  robots: "noindex, nofollow",
 };
 
 export const viewport = {
