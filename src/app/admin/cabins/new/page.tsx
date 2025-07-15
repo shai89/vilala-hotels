@@ -19,6 +19,7 @@ export default function AddCabinPage() {
     name: '',
     slug: '',
     description: '',
+    type: 'cabin',
     city: '',
     region: '',
     checkInTime: '15:00',
@@ -87,27 +88,42 @@ export default function AddCabinPage() {
   const router = useRouter()
 
   const handleSave = async () => {
-    if (!cabin.name || !cabin.city || !cabin.region) {
-      alert('אנא מלא את כל השדות הנדרשים')
+    if (!cabin.name || !cabin.slug || !cabin.city || !cabin.region) {
+      alert('אנא מלא את כל השדות הנדרשים (שם, slug, עיר, איזור)')
       return
+    }
+
+    if (rooms.length === 0) {
+      alert('אנא הוסף לפחות חדר אחד')
+      return
+    }
+
+    // Validate rooms
+    for (const room of rooms) {
+      if (!room.name || room.pricePerNight === 0 || room.maxGuests === 0) {
+        alert('אנא מלא את כל הפרטים הנדרשים בחדרים (שם, מחיר, מספר אורחים)')
+        return
+      }
     }
 
     setIsSaving(true)
     try {
       const result = await createCabin({
         ...cabin,
-        amenities: selectedAmenities
+        type: cabin.type,
+        amenities: selectedAmenities,
+        rooms: rooms
       })
       
       if (result.success) {
-        alert('הצימר נוצר בהצלחה!')
+        alert('המקום נוצר בהצלחה!')
         router.push('/admin/cabins')
       } else {
-        alert('שגיאה ביצירת הצימר: ' + result.error)
+        alert('שגיאה ביצירת המקום: ' + result.error)
       }
     } catch (error) {
       console.error('Error creating cabin:', error)
-      alert('שגיאה ביצירת הצימר')
+      alert('שגיאה ביצירת המקום')
     } finally {
       setIsSaving(false)
     }
@@ -129,8 +145,8 @@ export default function AddCabinPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">צימר חדש</h1>
-              <span className="text-sm text-gray-500">צור צימר חדש במערכת</span>
+              <h1 className="text-2xl font-bold text-gray-900">הוספת מקום</h1>
+              <span className="text-sm text-gray-500">צור מקום חדש במערכת</span>
             </div>
             <div className="flex items-center gap-3">
               <button 
@@ -142,10 +158,10 @@ export default function AddCabinPage() {
               </button>
               <button 
                 onClick={handleSave}
-                disabled={isSaving || !cabin.name || !cabin.city || !cabin.region}
+                disabled={isSaving || !cabin.name || !cabin.slug || !cabin.city || !cabin.region}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
               >
-                {isSaving ? 'יוצר...' : 'שמור צימר'}
+                {isSaving ? 'יוצר...' : 'שמור מקום'}
               </button>
             </div>
           </div>
@@ -162,29 +178,42 @@ export default function AddCabinPage() {
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                פרטי הצימר
+                פרטי המקום
               </h2>
               
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">שם הצימר *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">שם המקום *</label>
                     <input
                       type="text"
                       value={cabin.name}
                       onChange={(e) => setCabin(prev => ({ ...prev, name: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                      placeholder="הכנס את שם הצימר..."
+                      placeholder="הכנס את שם המקום..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">סוג המקום *</label>
+                    <select
+                      value={cabin.type}
+                      onChange={(e) => setCabin(prev => ({ ...prev, type: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+                    >
+                      <option value="cabin">צימר</option>
+                      <option value="villa">וילה</option>
+                      <option value="loft">לופט</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
                     <input
                       type="text"
                       value={cabin.slug}
                       onChange={(e) => setCabin(prev => ({ ...prev, slug: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                       placeholder="cabin-name-slug"
+                      required
                     />
                   </div>
                 </div>
@@ -217,13 +246,13 @@ export default function AddCabinPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">תיאור הצימר</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">תיאור המקום</label>
                   <textarea
                     value={cabin.description}
                     onChange={(e) => setCabin(prev => ({ ...prev, description: e.target.value }))}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none"
-                    placeholder="תאר את הצימר - מה מיוחד בו ואיך הוא נראה..."
+                    placeholder="תאר את המקום - מה מיוחד בו ואיך הוא נראה..."
                   />
                 </div>
 
@@ -391,7 +420,7 @@ export default function AddCabinPage() {
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                תמונות הצימר
+                תמונות המקום
               </h2>
               
               <div className="space-y-4">
@@ -444,7 +473,7 @@ export default function AddCabinPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">תיאור SEO</label>
                   <textarea
-                    placeholder="צימר בסגנום במדבר עם נוף מדהים לכרמל הדהים, בריכה פרטית ועיצוב מדהים. מקום מושלם לזוגות המחפשים חוויה רומנטית ובלתי נשכחת במדבר יהודה."
+                    placeholder="מקום בסגנום במדבר עם נוף מדהים לכרמל הדהים, בריכה פרטית ועיצוב מדהים. מקום מושלם לזוגות המחפשים חוויה רומנטית ובלתי נשכחת במדבר יהודה."
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none resize-none text-sm"
                   />

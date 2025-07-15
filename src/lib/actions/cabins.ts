@@ -18,6 +18,7 @@ export async function getCabins() {
       name: cabin.name,
       slug: cabin.slug,
       description: cabin.description,
+      type: cabin.type,
       city: cabin.city,
       region: cabin.region,
       checkInTime: cabin.checkInTime,
@@ -68,6 +69,7 @@ export async function getCabinById(id: string) {
       name: cabin.name,
       slug: cabin.slug,
       description: cabin.description,
+      type: cabin.type,
       city: cabin.city,
       region: cabin.region,
       checkInTime: cabin.checkInTime,
@@ -110,6 +112,7 @@ export async function updateCabin(id: string, data: any) {
         name: data.name,
         slug: data.slug,
         description: data.description,
+        type: data.type,
         city: data.city,
         region: data.region,
         checkInTime: data.checkInTime,
@@ -124,29 +127,74 @@ export async function updateCabin(id: string, data: any) {
       }
     })
 
+    // Handle rooms updates if provided
+    if (data.rooms) {
+      // Delete existing rooms
+      await prisma.room.deleteMany({
+        where: { cabinId: id }
+      })
+
+      // Create new rooms
+      for (const roomData of data.rooms) {
+        await prisma.room.create({
+          data: {
+            name: roomData.name,
+            cabinId: id,
+            description: roomData.description || '',
+            maxGuests: roomData.maxGuests,
+            pricePerNight: roomData.pricePerNight,
+            weekendPrice: roomData.weekendPrice || null,
+            sizeSqm: roomData.sizeSqm || null,
+            amenities: JSON.stringify(roomData.amenities || []),
+            images: JSON.stringify([]),
+            createdById: 'system',
+            createdBy: 'system'
+          }
+        })
+      }
+    }
+
+    // Get updated cabin with rooms
+    const finalCabin = await prisma.cabin.findUnique({
+      where: { id },
+      include: { rooms: true }
+    })
+
     return {
       success: true,
       cabin: {
-        id: updatedCabin.id,
-        name: updatedCabin.name,
-        slug: updatedCabin.slug,
-        description: updatedCabin.description,
-        city: updatedCabin.city,
-        region: updatedCabin.region,
-        checkInTime: updatedCabin.checkInTime,
-        checkOutTime: updatedCabin.checkOutTime,
-        maxGuests: updatedCabin.maxGuests,
-        amenities: typeof updatedCabin.amenities === 'string' 
-          ? JSON.parse(updatedCabin.amenities) 
-          : updatedCabin.amenities || [],
-        featured: updatedCabin.featured,
-        rating: updatedCabin.rating,
-        images: typeof updatedCabin.images === 'string' 
-          ? JSON.parse(updatedCabin.images) 
-          : updatedCabin.images || [],
-        rooms: updatedCabin.rooms || [],
-        createdAt: updatedCabin.createdDate.toISOString(),
-        updatedAt: updatedCabin.updatedDate.toISOString()
+        id: finalCabin!.id,
+        name: finalCabin!.name,
+        slug: finalCabin!.slug,
+        description: finalCabin!.description,
+        type: finalCabin!.type,
+        city: finalCabin!.city,
+        region: finalCabin!.region,
+        checkInTime: finalCabin!.checkInTime,
+        checkOutTime: finalCabin!.checkOutTime,
+        maxGuests: finalCabin!.maxGuests,
+        amenities: typeof finalCabin!.amenities === 'string' 
+          ? JSON.parse(finalCabin!.amenities) 
+          : finalCabin!.amenities || [],
+        featured: finalCabin!.featured,
+        rating: finalCabin!.rating,
+        images: typeof finalCabin!.images === 'string' 
+          ? JSON.parse(finalCabin!.images) 
+          : finalCabin!.images || [],
+        rooms: finalCabin!.rooms?.map(room => ({
+          ...room,
+          pricePerNight: Number(room.pricePerNight),
+          weekendPrice: room.weekendPrice ? Number(room.weekendPrice) : null,
+          holidayPrice: room.holidayPrice ? Number(room.holidayPrice) : null,
+          amenities: typeof room.amenities === 'string' 
+            ? JSON.parse(room.amenities) 
+            : room.amenities || [],
+          images: typeof room.images === 'string' 
+            ? JSON.parse(room.images) 
+            : room.images || [],
+        })) || [],
+        createdAt: finalCabin!.createdDate.toISOString(),
+        updatedAt: finalCabin!.updatedDate.toISOString()
       }
     }
   } catch (error) {
@@ -169,11 +217,18 @@ export async function deleteCabin(id: string) {
 
 export async function createCabin(data: any) {
   try {
+    // Get the first available owner
+    const firstOwner = await prisma.owner.findFirst()
+    if (!firstOwner) {
+      return { success: false, error: 'No owners found in database' }
+    }
+
     const newCabin = await prisma.cabin.create({
       data: {
         name: data.name,
         slug: data.slug,
         description: data.description,
+        type: data.type || 'cabin',
         city: data.city,
         region: data.region,
         checkInTime: data.checkInTime,
@@ -183,7 +238,7 @@ export async function createCabin(data: any) {
         images: JSON.stringify([]),
         featured: data.featured || false,
         rating: data.rating || 0,
-        ownerId: 'default-owner',
+        ownerId: firstOwner.id,
         createdById: 'system',
         createdBy: 'system'
       },
@@ -192,6 +247,7 @@ export async function createCabin(data: any) {
         name: true,
         slug: true,
         description: true,
+        type: true,
         city: true,
         region: true,
         checkInTime: true,
@@ -206,6 +262,34 @@ export async function createCabin(data: any) {
       }
     })
 
+    // Create rooms if provided
+    const createdRooms = []
+    if (data.rooms && data.rooms.length > 0) {
+      for (const roomData of data.rooms) {
+        const room = await prisma.room.create({
+          data: {
+            name: roomData.name,
+            cabinId: newCabin.id,
+            description: roomData.description || '',
+            maxGuests: roomData.maxGuests,
+            pricePerNight: roomData.pricePerNight,
+            weekendPrice: roomData.weekendPrice || null,
+            sizeSqm: roomData.size || null,
+            amenities: JSON.stringify(roomData.amenities || []),
+            images: JSON.stringify([]),
+            createdById: 'system',
+            createdBy: 'system'
+          }
+        })
+        createdRooms.push({
+          id: room.id,
+          name: room.name,
+          pricePerNight: Number(room.pricePerNight),
+          maxGuests: room.maxGuests
+        })
+      }
+    }
+
     return {
       success: true,
       cabin: {
@@ -213,6 +297,7 @@ export async function createCabin(data: any) {
         name: newCabin.name,
         slug: newCabin.slug,
         description: newCabin.description,
+        type: newCabin.type,
         city: newCabin.city,
         region: newCabin.region,
         checkInTime: newCabin.checkInTime,
@@ -226,7 +311,7 @@ export async function createCabin(data: any) {
         images: typeof newCabin.images === 'string' 
           ? JSON.parse(newCabin.images) 
           : newCabin.images || [],
-        rooms: [],
+        rooms: createdRooms,
         createdAt: newCabin.createdDate.toISOString(),
         updatedAt: newCabin.updatedDate.toISOString()
       }

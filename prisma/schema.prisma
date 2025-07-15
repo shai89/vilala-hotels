@@ -42,6 +42,7 @@ model Cabin {
   name            String
   slug            String   @unique
   description     String?
+  type            String   @default("cabin") // cabin, villa, loft
   ownerId         String   @map("owner_id")
   address         String?
   city            String?

@@ -17,6 +17,7 @@ interface CabinsPageProps {
     maxPrice?: string;
     amenities?: string;
     region?: string;
+    type?: string;
   }>;
 }
 

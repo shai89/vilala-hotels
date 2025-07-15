@@ -10,6 +10,7 @@ interface Cabin {
   name: string
   slug: string
   description: string | null
+  type: string
   city: string | null
   region: string | null
   checkInTime: string | null
@@ -43,6 +44,7 @@ interface CabinsClientProps {
     maxPrice?: string
     amenities?: string
     region?: string
+    type?: string
   }
 }
 
@@ -64,6 +66,7 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
       initialSearchParams.amenities.split(',').map(amenity => decodeURIComponent(amenity)) : 
       []
   )
+  const [selectedType, setSelectedType] = useState(initialSearchParams.type || '')
   const [sortBy, setSortBy] = useState('name')
 
   // Get unique regions and amenities
@@ -85,6 +88,11 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
     // Filter by region
     if (selectedRegion) {
       filtered = filtered.filter(cabin => cabin.region === selectedRegion)
+    }
+
+    // Filter by type
+    if (selectedType) {
+      filtered = filtered.filter(cabin => cabin.type === selectedType)
     }
 
     // Filter by guest count
@@ -127,7 +135,7 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
     })
 
     setFilteredCabins(filtered)
-  }, [cabins, searchTerm, selectedRegion, guestCount, priceRange, selectedAmenities, sortBy])
+  }, [cabins, searchTerm, selectedRegion, selectedType, guestCount, priceRange, selectedAmenities, sortBy])
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities(prev => 
@@ -140,6 +148,7 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
   const clearFilters = () => {
     setSearchTerm('')
     setSelectedRegion('')
+    setSelectedType('')
     setGuestCount(1)
     setPriceRange({ min: 0, max: 2000 })
     setSelectedAmenities([])
@@ -150,9 +159,13 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">כל הצימרים</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          {selectedType === 'cabin' ? 'צימרים' : 
+           selectedType === 'villa' ? 'וילות' : 
+           selectedType === 'loft' ? 'לופטים' : 'כל המקומות'}
+        </h1>
         <p className="text-lg text-gray-600">
-          מצא את הצימר המושלם עבורך מתוך {cabins.length} צימרים מדהימים
+          מצא את המקום המושלם עבורך מתוך {filteredCabins.length} מקומות מדהימים
         </p>
       </div>
 
@@ -173,15 +186,32 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
             {/* Search */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                חפש צימר או עיר
+                חפש מקום או עיר
               </label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="שם צימר או עיר..."
+                placeholder="שם מקום או עיר..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               />
+            </div>
+
+            {/* Type Filter */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                סוג מקום
+              </label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+              >
+                <option value="">כל הסוגים</option>
+                <option value="cabin">צימרים</option>
+                <option value="villa">וילות</option>
+                <option value="loft">לופטים</option>
+              </select>
             </div>
 
             {/* Region Filter */}
@@ -268,7 +298,7 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
           {/* Sort and Results Count */}
           <div className="flex items-center justify-between mb-6">
             <div className="text-gray-600">
-              {filteredCabins.length} צימרים נמצאו
+              {filteredCabins.length} מקומות נמצאו
             </div>
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-700">מיין לפי:</label>
@@ -354,10 +384,17 @@ export function CabinsClient({ initialCabins, initialSearchParams }: CabinsClien
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-xl font-bold text-gray-900">
-                            ₪{minPrice.toLocaleString()}
-                          </span>
-                          <span className="text-sm text-gray-500">ללילה</span>
+                          {minPrice > 0 ? (
+                            <>
+                              <span className="text-sm text-gray-500">החל מ</span>
+                              <span className="text-xl font-bold text-gray-900">
+                                ₪{minPrice.toLocaleString()}
+                              </span>
+                              <span className="text-sm text-gray-500">ללילה</span>
+                            </>
+                          ) : (
+                            <span className="text-sm text-gray-500">צור קשר לפרטים</span>
+                          )}
                         </div>
                         <div className="text-purple-600 font-medium text-sm">
                           צפה בפרטים →

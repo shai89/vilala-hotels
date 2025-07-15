@@ -29,7 +29,7 @@ interface CabinsClientProps {
 }
 
 export function CabinsClient({ initialCabins }: CabinsClientProps) {
-  const [selectedFilter, setSelectedFilter] = useState('כל הצימרים')
+  const [selectedFilter, setSelectedFilter] = useState('כל המקומות')
   const [searchTerm, setSearchTerm] = useState('')
   const [cabins, setCabins] = useState<Cabin[]>(initialCabins || [])
   const [filteredCabins, setFilteredCabins] = useState<Cabin[]>(initialCabins || [])
@@ -43,7 +43,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
   }
 
   const handleDeleteCabin = async (cabinId: string) => {
-    if (!confirm('האם אתה בטוח שברצונך למחוק צימר זה?')) {
+    if (!confirm('האם אתה בטוח שברצונך למחוק מקום זה?')) {
       return
     }
 
@@ -52,11 +52,11 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
       if (result.success) {
         setCabins(prev => prev.filter(c => c.id !== cabinId))
       } else {
-        alert('שגיאה במחיקת הצימר')
+        alert('שגיאה במחיקת המקום')
       }
     } catch (error) {
       console.error('Error deleting cabin:', error)
-      alert('שגיאה במחיקת הצימר')
+      alert('שגיאה במחיקת המקום')
     }
   }
 
@@ -74,7 +74,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
     }
 
     // Filter by region
-    if (selectedFilter !== 'כל הצימרים') {
+    if (selectedFilter !== 'כל המקומות') {
       filtered = filtered.filter(cabin => cabin.region === selectedFilter)
     }
 
@@ -88,8 +88,8 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
       {/* Top Header */}
       <div className="bg-white shadow-sm p-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">ניהול צימרים</h1>
-          <p className="text-gray-600 mt-1">צפה ונהל את כל הצימרים במערכת</p>
+          <h1 className="text-2xl font-bold text-gray-900">ניהול מקומות</h1>
+          <p className="text-gray-600 mt-1">צפה ונהל את כל המקומות במערכת</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="text-gray-500 hover:text-gray-700">
@@ -106,7 +106,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
             href="/admin/cabins/new"
             className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
           >
-            + צימר חדש
+            + הוספת מקום
           </Link>
         </div>
       </div>
@@ -117,7 +117,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">סה"כ צימרים</p>
+                <p className="text-gray-600 text-sm">סה"כ מקומות</p>
                 <p className="text-2xl font-bold text-blue-600">{stats.totalCabins}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -131,7 +131,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">צימרים מומלצים</p>
+                <p className="text-gray-600 text-sm">מקומות מומלצים</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.featuredCabins}</p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-lg">
@@ -145,7 +145,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">צימרים פעילים</p>
+                <p className="text-gray-600 text-sm">מקומות פעילים</p>
                 <p className="text-2xl font-bold text-green-600">{stats.activeCabins}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
@@ -178,7 +178,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="חפש צימר לפי שם, עיר או איזור..."
+                placeholder="חפש מקום לפי שם, עיר או איזור..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -190,7 +190,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
               >
-                <option>כל הצימרים</option>
+                <option>כל המקומות</option>
                 {regions.map(region => (
                   <option key={region} value={region}>{region}</option>
                 ))}
@@ -266,7 +266,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                     <Link
                       href={`/admin/cabins/${cabin.id}/edit`}
                       className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                      title={`עריכת צימר - ID: ${cabin.id}`}
+                      title={`עריכת מקום - ID: ${cabin.id}`}
                       onClick={() => {
                         console.log('Edit cabin with ID:', cabin.id)
                         console.log('Edit cabin object:', cabin)
@@ -280,7 +280,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                     <button 
                       onClick={() => handleDeleteCabin(cabin.id)}
                       className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                      title="מחיקת צימר"
+                      title="מחיקת מקום"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -303,8 +303,8 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">אין צימרים</h3>
-              <p className="mt-1 text-sm text-gray-500">לא נמצאו צימרים התואמים את החיפוש</p>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">אין מקומות</h3>
+              <p className="mt-1 text-sm text-gray-500">לא נמצאו מקומות התואמים את החיפוש</p>
               <div className="mt-6">
                 <Link
                   href="/admin/cabins/new"
@@ -313,7 +313,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                   <svg className="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  צימר חדש
+                  מקום חדש
                 </Link>
               </div>
             </div>

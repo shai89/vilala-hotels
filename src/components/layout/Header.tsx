@@ -30,8 +30,14 @@ export function Header() {
             <Link href="/" className="text-gray-700 hover:text-gray-900 font-medium">
               בית
             </Link>
-            <Link href="/cabins" className="text-gray-700 hover:text-gray-900 font-medium">
+            <Link href="/cabins?type=cabin" className="text-gray-700 hover:text-gray-900 font-medium">
               צימרים
+            </Link>
+            <Link href="/cabins?type=villa" className="text-gray-700 hover:text-gray-900 font-medium">
+              וילות
+            </Link>
+            <Link href="/cabins?type=loft" className="text-gray-700 hover:text-gray-900 font-medium">
+              לופטים
             </Link>
             <Link href="/blog" className="text-gray-700 hover:text-gray-900 font-medium">
               בלוג
@@ -103,11 +109,25 @@ export function Header() {
                 בית
               </Link>
               <Link 
-                href="/cabins" 
+                href="/cabins?type=cabin" 
                 className="block text-gray-700 hover:text-gray-900 font-medium py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 צימרים
+              </Link>
+              <Link 
+                href="/cabins?type=villa" 
+                className="block text-gray-700 hover:text-gray-900 font-medium py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                וילות
+              </Link>
+              <Link 
+                href="/cabins?type=loft" 
+                className="block text-gray-700 hover:text-gray-900 font-medium py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                לופטים
               </Link>
               <Link 
                 href="/blog" 
