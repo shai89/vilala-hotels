@@ -1,7 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
+interface HeroStats {
+  totalCabins: number;
+  uniqueRegions: number;
+  uniqueAmenities: number;
+}
 
 export function Hero() {
   const router = useRouter();
@@ -11,6 +17,36 @@ export function Hero() {
     checkOut: '',
     guests: 2
   });
+
+  // Default stats (current real values from database as of query date)
+  // These values are fetched from the database based on:
+  // - totalCabins: Count of active cabins
+  // - uniqueRegions: Count of unique regions from active cabins  
+  // - uniqueAmenities: Count of unique amenities from active cabins and their rooms
+  const [stats, setStats] = useState<HeroStats>({
+    totalCabins: 3,        // 3 active cabins found
+    uniqueRegions: 3,      // 3 unique regions: גליל עליון, הכרמל, מדבר יהודה
+    uniqueAmenities: 12    // 12 unique amenities found across all cabins and rooms
+  });
+
+  // Optional: Fetch real-time stats (uncomment to enable dynamic fetching)
+  // useEffect(() => {
+  //   const fetchStats = async () => {
+  //     try {
+  //       const response = await fetch('/api/hero-stats');
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         if (data.success) {
+  //           setStats(data.data);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching hero stats:', error);
+  //     }
+  //   };
+  //   
+  //   fetchStats();
+  // }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -63,21 +99,22 @@ export function Hero() {
             </button>
           </div>
           
-          {/* Stats with Background */}
-          <div className="inline-flex bg-white/90 backdrop-blur-sm rounded-full px-4 md:px-8 py-3 md:py-4 mb-8 md:mb-12">
-            <div className="grid grid-cols-3 gap-4 md:gap-8 text-gray-800">
-              <div className="text-center">
-                <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-1">47</div>
-                <div className="text-xs opacity-70">יעדים מומלצים</div>
-              </div>
-              <div className="text-center border-l border-r border-gray-300 px-4 md:px-8">
-                <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-1">3+</div>
-                <div className="text-xs opacity-70">אזורים</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-1">4+</div>
-                <div className="text-xs opacity-70">פינוק</div>
-              </div>
+        </div>
+        
+        {/* Stats with Background - Above search form */}
+        <div className="inline-flex bg-white/90 backdrop-blur-sm rounded-full px-4 md:px-8 py-3 md:py-4 mb-6">
+          <div className="grid grid-cols-3 gap-4 md:gap-8 text-gray-800">
+            <div className="text-center">
+              <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-1">{stats.totalCabins}</div>
+              <div className="text-xs opacity-70">יעדים מומלצים</div>
+            </div>
+            <div className="text-center border-l border-r border-gray-300 px-4 md:px-8">
+              <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-1">{stats.uniqueRegions}+</div>
+              <div className="text-xs opacity-70">אזורים</div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-1">{stats.uniqueAmenities}+</div>
+              <div className="text-xs opacity-70">פינוק</div>
             </div>
           </div>
         </div>

@@ -199,7 +199,7 @@ export default function AdminDashboard() {
               <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">2</span>
             </button>
             <a href="/admin/cabins/new" className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium">
-              + צימר חדש
+              +הוספת מקום חדש
             </a>
           </div>
         </div>
