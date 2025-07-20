@@ -48,10 +48,8 @@ next-env.d.ts
 *.db
 *.db-journal
 
-# Temporary scripts
-/scripts/check-*.ts
-/scripts/add-*.ts
-/scripts/update-*.ts
+# Temporary scripts  
+/scripts/
 
 # Todo tracking files
 todos.md
