@@ -47,10 +47,10 @@ export function RegionHighlights() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-base-content mb-4">
-            מקור אזורים
+            אזורים
           </h2>
           <p className="text-base-content/70 max-w-2xl mx-auto">
-            בחר את האזור הרצוי מבין האזורים הפופולריים שלנו וגלה צימרים מדהימים בכל רחבי הארץ
+            בחר את האזור הרצוי מבין האזורים הפופולריים שלנו וגלה מקומות מדהימים בכל רחבי הארץ
           </p>
         </div>
         
@@ -79,10 +79,10 @@ export function RegionHighlights() {
                 <CardBody className="p-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-base-content/70">
-                      {region.count} צימרים זמינים
+                      {region.count} מקומות זמינים
                     </span>
                     <div className="text-primary font-medium">
-                      חקור &larr;
+                      בדוק &larr;
                     </div>
                   </div>
                 </CardBody>

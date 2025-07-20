@@ -253,3 +253,32 @@ model VerificationToken {
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
+
+model Image {
+  id          String   @id @default(cuid())
+  publicId    String   @unique // Cloudinary public_id
+  secureUrl   String   @map("secure_url") // Cloudinary secure_url
+  originalUrl String   @map("original_url") // Original uploaded URL
+  width       Int
+  height      Int
+  format      String   // jpg, png, webp, etc.
+  size        Int      // File size in bytes
+  altText     String?  @map("alt_text") // SEO alt text
+  title       String?  // SEO title
+  description String?  // Longer description for SEO
+  isCover     Boolean  @default(false) @map("is_cover")
+  sortOrder   Int      @default(0) @map("sort_order")
+  entityType  String   @map("entity_type") // 'cabin' or 'room'
+  entityId    String   @map("entity_id") // cabin or room ID
+  qualityScore Float?  @map("quality_score") // AI-based quality score (0-1)
+  isProcessed Boolean  @default(false) @map("is_processed") // Has been processed for quality
+  processingStatus String @default("pending") @map("processing_status") // pending, processing, completed, failed
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   String   @map("created_by")
+  
+  @@index([entityType, entityId])
+  @@index([isCover])
+  @@index([sortOrder])
+  @@map("images")
+}

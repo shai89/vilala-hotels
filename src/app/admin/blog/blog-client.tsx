@@ -32,8 +32,12 @@ interface BlogClientProps {
 export function BlogClient({ initialArticles }: BlogClientProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('כל המאמרים')
+  const [selectedTag, setSelectedTag] = useState('')
   const [articles, setArticles] = useState<Article[]>(initialArticles)
   const [filteredArticles, setFilteredArticles] = useState<Article[]>(initialArticles)
+
+  // Get unique tags from all articles
+  const allTags = Array.from(new Set(initialArticles.flatMap(article => article.tags)))
 
   // Calculate stats
   const stats = {
@@ -101,8 +105,13 @@ export function BlogClient({ initialArticles }: BlogClientProps) {
       filtered = filtered.filter(article => !article.published)
     }
 
+    // Filter by tag
+    if (selectedTag) {
+      filtered = filtered.filter(article => article.tags.includes(selectedTag))
+    }
+
     setFilteredArticles(filtered)
-  }, [articles, selectedFilter, searchTerm])
+  }, [articles, selectedFilter, selectedTag, searchTerm])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('he-IL')
@@ -111,7 +120,7 @@ export function BlogClient({ initialArticles }: BlogClientProps) {
   return (
     <div className="flex-1 flex flex-col">
       {/* Top Header */}
-      <div className="bg-white shadow-sm p-6 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-200 p-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">ניהול בלוג</h1>
           <p className="text-gray-600 mt-1">צפה ונהל את כל המאמרים במערכת בבלוג</p>
@@ -198,7 +207,7 @@ export function BlogClient({ initialArticles }: BlogClientProps) {
 
         {/* Search and Filter */}
         <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <input
                 type="text"
@@ -208,7 +217,7 @@ export function BlogClient({ initialArticles }: BlogClientProps) {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="w-48">
+            <div className="w-full lg:w-48">
               <select 
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
                 value={selectedFilter}
@@ -219,7 +228,67 @@ export function BlogClient({ initialArticles }: BlogClientProps) {
                 <option>טיוטה</option>
               </select>
             </div>
+            <div className="w-full lg:w-48">
+              <select 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+                value={selectedTag}
+                onChange={(e) => setSelectedTag(e.target.value)}
+              >
+                <option value="">כל הנושאים</option>
+                {allTags.map(tag => (
+                  <option key={tag} value={tag}>{tag}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={() => {
+                setSearchTerm('')
+                setSelectedFilter('כל המאמרים')
+                setSelectedTag('')
+              }}
+              className={`w-full lg:w-auto px-6 py-3 rounded-lg transition-colors font-medium ${
+                (searchTerm || selectedFilter !== 'כל המאמרים' || selectedTag)
+                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
+              }`}
+            >
+              נקה מסננים
+            </button>
           </div>
+
+          {/* Tag Pills */}
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              <button
+                onClick={() => setSelectedTag('')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  selectedTag === ''
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                הכל
+              </button>
+              {allTags.slice(0, 8).map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedTag === tag
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+              {allTags.length > 8 && (
+                <span className="px-4 py-2 text-sm text-gray-500">
+                  +{allTags.length - 8} עוד
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Articles List */}

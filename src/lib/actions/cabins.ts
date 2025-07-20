@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function getCabins() {
   try {
+    console.log('Fetching cabins from database...');
     const cabins = await prisma.cabin.findMany({
       include: {
         rooms: true,
@@ -12,6 +13,34 @@ export async function getCabins() {
         createdDate: 'desc'
       }
     })
+    console.log('Found cabins:', cabins.length);
+
+    // Get all images for these cabins
+    const cabinIds = cabins.map(cabin => cabin.id);
+    const roomIds = cabins.flatMap(cabin => cabin.rooms?.map(room => room.id) || []);
+    
+    const [cabinImages, roomImages] = await Promise.all([
+      prisma.image.findMany({
+        where: {
+          entityType: 'cabin',
+          entityId: { in: cabinIds }
+        },
+        orderBy: [
+          { isCover: 'desc' },
+          { sortOrder: 'asc' }
+        ]
+      }),
+      prisma.image.findMany({
+        where: {
+          entityType: 'room',
+          entityId: { in: roomIds }
+        },
+        orderBy: [
+          { isCover: 'desc' },
+          { sortOrder: 'asc' }
+        ]
+      })
+    ]);
 
     return cabins.map(cabin => ({
       id: cabin.id,
@@ -29,9 +58,19 @@ export async function getCabins() {
         : cabin.amenities || [],
       featured: cabin.featured,
       rating: cabin.rating,
-      images: typeof cabin.images === 'string' 
-        ? JSON.parse(cabin.images) 
-        : cabin.images || [],
+      images: cabinImages
+        .filter(img => img.entityId === cabin.id)
+        .map(img => ({
+          id: img.id,
+          url: img.secureUrl,
+          alt: img.altText || cabin.name,
+          is_cover: img.isCover,
+          title: img.title,
+          description: img.description,
+          width: img.width,
+          height: img.height,
+          publicId: img.publicId
+        })),
       rooms: cabin.rooms?.map(room => ({
         ...room,
         pricePerNight: Number(room.pricePerNight),
@@ -40,9 +79,19 @@ export async function getCabins() {
         amenities: typeof room.amenities === 'string' 
           ? JSON.parse(room.amenities) 
           : room.amenities || [],
-        images: typeof room.images === 'string' 
-          ? JSON.parse(room.images) 
-          : room.images || [],
+        images: roomImages
+          .filter(img => img.entityId === room.id)
+          .map(img => ({
+            id: img.id,
+            url: img.secureUrl,
+            alt: img.altText || room.name,
+            is_cover: img.isCover,
+            title: img.title,
+            description: img.description,
+            width: img.width,
+            height: img.height,
+            publicId: img.publicId
+          })),
       })) || [],
       createdAt: cabin.createdDate.toISOString(),
       updatedAt: cabin.updatedDate.toISOString()
@@ -64,6 +113,32 @@ export async function getCabinById(id: string) {
 
     if (!cabin) return null
 
+    // Get images for this cabin and its rooms
+    const roomIds = cabin.rooms?.map(room => room.id) || [];
+    
+    const [cabinImages, roomImages] = await Promise.all([
+      prisma.image.findMany({
+        where: {
+          entityType: 'cabin',
+          entityId: cabin.id
+        },
+        orderBy: [
+          { isCover: 'desc' },
+          { sortOrder: 'asc' }
+        ]
+      }),
+      roomIds.length > 0 ? prisma.image.findMany({
+        where: {
+          entityType: 'room',
+          entityId: { in: roomIds }
+        },
+        orderBy: [
+          { isCover: 'desc' },
+          { sortOrder: 'asc' }
+        ]
+      }) : []
+    ]);
+
     return {
       id: cabin.id,
       name: cabin.name,
@@ -80,9 +155,17 @@ export async function getCabinById(id: string) {
         : cabin.amenities || [],
       featured: cabin.featured,
       rating: cabin.rating,
-      images: typeof cabin.images === 'string' 
-        ? JSON.parse(cabin.images) 
-        : cabin.images || [],
+      images: cabinImages.map(img => ({
+        id: img.id,
+        url: img.secureUrl,
+        alt: img.altText || cabin.name,
+        is_cover: img.isCover,
+        title: img.title,
+        description: img.description,
+        width: img.width,
+        height: img.height,
+        publicId: img.publicId
+      })),
       rooms: cabin.rooms?.map(room => ({
         ...room,
         pricePerNight: Number(room.pricePerNight),
@@ -91,9 +174,19 @@ export async function getCabinById(id: string) {
         amenities: typeof room.amenities === 'string' 
           ? JSON.parse(room.amenities) 
           : room.amenities || [],
-        images: typeof room.images === 'string' 
-          ? JSON.parse(room.images) 
-          : room.images || [],
+        images: roomImages
+          .filter(img => img.entityId === room.id)
+          .map(img => ({
+            id: img.id,
+            url: img.secureUrl,
+            alt: img.altText || room.name,
+            is_cover: img.isCover,
+            title: img.title,
+            description: img.description,
+            width: img.width,
+            height: img.height,
+            publicId: img.publicId
+          })),
       })) || [],
       createdAt: cabin.createdDate.toISOString(),
       updatedAt: cabin.updatedDate.toISOString()

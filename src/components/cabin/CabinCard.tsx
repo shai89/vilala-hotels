@@ -29,6 +29,7 @@ interface CabinCardProps {
 }
 
 export function CabinCard({ cabin }: CabinCardProps) {
+  const coverImageObj = cabin.images.find(img => img.is_cover) || cabin.images[0];
   const coverImage = getCoverImage(cabin.images);
   const minPrice = Math.min(...cabin.rooms.map(room => room.pricePerNight));
   const averageRating = cabin.reviews.length > 0 
@@ -45,7 +46,8 @@ export function CabinCard({ cabin }: CabinCardProps) {
         )}
         <Image
           src={coverImage}
-          alt={cabin.name}
+          alt={coverImageObj?.alt || cabin.name}
+          title={coverImageObj?.title || cabin.name}
           fill
           className="object-cover hover:scale-105 transition-transform duration-300"
         />

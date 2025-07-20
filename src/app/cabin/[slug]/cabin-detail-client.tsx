@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -44,6 +44,7 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
   const [checkOutDate, setCheckOutDate] = useState('')
   const [guests, setGuests] = useState(2)
   const [showFullGallery, setShowFullGallery] = useState(false)
+  const [showImageSEO, setShowImageSEO] = useState(false)
 
   const coverImage = cabin.images.find(img => img.is_cover) || cabin.images[0]
   const minPrice = cabin.rooms.length > 0 
@@ -75,56 +76,150 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
     return subtotal + serviceFee
   }
 
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    if (!showFullGallery) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowFullGallery(false);
+      } else if (e.key === 'ArrowLeft') {
+        setSelectedImageIndex(selectedImageIndex > 0 ? selectedImageIndex - 1 : cabin.images.length - 1);
+      } else if (e.key === 'ArrowRight') {
+        setSelectedImageIndex(selectedImageIndex < cabin.images.length - 1 ? selectedImageIndex + 1 : 0);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showFullGallery, selectedImageIndex, cabin.images.length]);
+
+  // Generate structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    name: cabin.name,
+    description: cabin.description,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: cabin.city,
+      addressRegion: cabin.region,
+      addressCountry: "IL"
+    },
+    image: cabin.images.map(img => ({
+      "@type": "ImageObject",
+      url: img.url,
+      caption: img.alt || img.title,
+      description: img.description
+    })),
+    starRating: {
+      "@type": "Rating",
+      ratingValue: cabin.rating
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      {/* SEO Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData, null, 2),
+        }}
+      />
       {/* Header Image Gallery */}
       <div className="relative w-full h-64 md:h-96 overflow-hidden">
         <Image
           src={cabin.images[selectedImageIndex]?.url || '/placeholder-cabin.jpg'}
-          alt={cabin.name}
+          alt={cabin.images[selectedImageIndex]?.alt || cabin.name}
+          title={cabin.images[selectedImageIndex]?.title || cabin.name}
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-black bg-opacity-30" />
-        <div className="absolute bottom-4 right-4">
+        <div className="absolute bottom-4 right-4 flex gap-2">
           <button 
             onClick={() => setShowFullGallery(true)}
             className="bg-white bg-opacity-90 text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-opacity-100 transition-all"
           >
             צפה בכל התמונות ({cabin.images.length})
           </button>
+          {process.env.NODE_ENV === 'development' && (
+            <button 
+              onClick={() => setShowImageSEO(!showImageSEO)}
+              className="bg-blue-600 bg-opacity-90 text-white px-4 py-2 rounded-lg font-medium hover:bg-opacity-100 transition-all"
+            >
+              SEO Data
+            </button>
+          )}
         </div>
         
         {/* Thumbnail Gallery */}
         {cabin.images.length > 1 && (
-          <div className="absolute bottom-4 left-4 flex gap-2 max-w-xs overflow-x-auto">
-            {cabin.images.slice(0, 5).map((image, index) => (
+          <div className="absolute bottom-4 left-4 flex gap-3 max-w-sm">
+            {cabin.images.slice(0, 4).map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImageIndex(index)}
-                className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
                   selectedImageIndex === index 
-                    ? 'border-white scale-110' 
-                    : 'border-white/50 hover:border-white'
+                    ? 'border-white scale-105' 
+                    : 'border-white/60 hover:border-white hover:scale-105'
                 }`}
               >
                 <Image
                   src={image.url}
-                  alt={`${cabin.name} תמונה ${index + 1}`}
+                  alt={image.alt || `${cabin.name} תמונה ${index + 1}`}
+                  title={image.title || `${cabin.name} תמונה ${index + 1}`}
                   fill
                   className="object-cover"
                 />
               </button>
             ))}
-            {cabin.images.length > 5 && (
-              <div className="flex items-center justify-center w-16 h-16 bg-black/50 rounded-lg text-white text-sm font-medium">
-                +{cabin.images.length - 5}
-              </div>
+            {cabin.images.length > 4 && (
+              <button
+                onClick={() => setShowFullGallery(true)}
+                className="flex items-center justify-center w-20 h-20 bg-black/60 hover:bg-black/80 rounded-lg text-white text-sm font-bold transition-all border-2 border-white/60 hover:border-white"
+              >
+                +{cabin.images.length - 4}
+              </button>
             )}
           </div>
         )}
       </div>
+
+      {/* SEO Debug Info */}
+      {showImageSEO && process.env.NODE_ENV === 'development' && (
+        <div className="bg-gray-100 border-t border-gray-200">
+          <div className="container mx-auto px-4 py-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">🔍 SEO Data for Current Image</h3>
+            {cabin.images[selectedImageIndex] && (
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <strong className="text-sm text-gray-600">Alt Text:</strong>
+                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].alt || 'Not set'}</p>
+                  </div>
+                  <div>
+                    <strong className="text-sm text-gray-600">Title:</strong>
+                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].title || 'Not set'}</p>
+                  </div>
+                  <div>
+                    <strong className="text-sm text-gray-600">Description:</strong>
+                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].description || 'Not set'}</p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-xs text-gray-500">
+                    ✅ This data is being used in: img alt attribute, img title attribute, OpenGraph tags, and JSON-LD structured data
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-8 pb-24 lg:pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -401,6 +496,104 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
           </Link>
         </div>
       </div>
+
+      {/* Full Gallery Modal */}
+      {showFullGallery && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
+          onClick={() => setShowFullGallery(false)}
+        >
+          <div 
+            className="relative w-full h-full max-w-6xl mx-auto p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowFullGallery(false)}
+              className="absolute top-4 right-4 z-[100] bg-black bg-opacity-60 hover:bg-opacity-90 hover:scale-110 text-white p-3 rounded-full transition-all shadow-lg cursor-pointer"
+              aria-label="סגור גלרייה"
+              title="סגור גלרייה (ESC)"
+            >
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Image Counter */}
+            <div className="absolute top-4 left-4 z-60 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+              {selectedImageIndex + 1} / {cabin.images.length}
+            </div>
+
+            {/* Main Image */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              <Image
+                src={cabin.images[selectedImageIndex]?.url || '/placeholder-cabin.jpg'}
+                alt={cabin.images[selectedImageIndex]?.alt || cabin.name}
+                title={cabin.images[selectedImageIndex]?.title || cabin.name}
+                fill
+                className="object-contain"
+                priority
+              />
+              
+              {/* Navigation Arrows */}
+              {cabin.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImageIndex(selectedImageIndex > 0 ? selectedImageIndex - 1 : cabin.images.length - 1)}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-full transition-all"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setSelectedImageIndex(selectedImageIndex < cabin.images.length - 1 ? selectedImageIndex + 1 : 0)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-full transition-all"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Thumbnail Strip */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-4">
+              <div className="flex gap-3 justify-center items-center overflow-x-auto scrollbar-hide py-2">
+                {cabin.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${
+                      selectedImageIndex === index 
+                        ? 'border-white scale-110 shadow-xl ring-2 ring-white/30' 
+                        : 'border-white/50 hover:border-white hover:scale-105'
+                    }`}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={image.alt || `${cabin.name} תמונה ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Image Info */}
+            {cabin.images[selectedImageIndex]?.title && (
+              <div className="absolute bottom-20 left-4 right-4 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+                <h3 className="font-semibold">{cabin.images[selectedImageIndex].title}</h3>
+                {cabin.images[selectedImageIndex]?.description && (
+                  <p className="text-sm mt-1 opacity-90">{cabin.images[selectedImageIndex].description}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Mobile Booking Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCabinsFromCSV } from '@/lib/csvData';
+import { getCabins } from '@/lib/actions/cabins';
 
 export async function GET(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const maxPrice = searchParams.get('maxPrice');
     const search = searchParams.get('search');
 
-    let cabins = await getCabinsFromCSV();
+    let cabins = await getCabins();
 
     // Filter by region
     if (region && region !== 'all') {
@@ -19,7 +19,8 @@ export async function GET(request: Request) {
     // Filter by price range
     if (minPrice || maxPrice) {
       cabins = cabins.filter(cabin => {
-        const minRoomPrice = Math.min(...cabin.rooms.map(room => room.pricePerNight));
+        if (cabin.rooms.length === 0) return false;
+        const minRoomPrice = Math.min(...cabin.rooms.map(room => Number(room.pricePerNight)));
         if (minPrice && minRoomPrice < parseInt(minPrice)) return false;
         if (maxPrice && minRoomPrice > parseInt(maxPrice)) return false;
         return true;
@@ -36,12 +37,19 @@ export async function GET(request: Request) {
       );
     }
 
-    // Sort by priority (1 first, then 0, then -1)
-    cabins.sort((a, b) => b.priority - a.priority);
+    // Sort by featured status and rating
+    cabins.sort((a, b) => {
+      if (a.featured && !b.featured) return -1;
+      if (!a.featured && b.featured) return 1;
+      return b.rating - a.rating;
+    });
 
+    console.log('API returning cabins:', cabins.length);
     return NextResponse.json(cabins);
   } catch (error) {
     console.error('Error fetching cabins:', error);
-    return NextResponse.json({ error: 'Failed to fetch cabins' }, { status: 500 });
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    return NextResponse.json({ error: 'Failed to fetch cabins', details: error.message }, { status: 500 });
   }
 }

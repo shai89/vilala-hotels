@@ -20,13 +20,15 @@ export async function POST(request: NextRequest) {
     // Upload to Cloudinary
     const result = await uploadToCloudinary(dataURI, {
       folder,
-      transformation: {
-        width: 1200,
-        height: 800,
-        crop: 'limit',
-        quality: 'auto:good',
-        format: 'auto'
-      }
+      transformation: [
+        {
+          width: 1200,
+          height: 800,
+          crop: 'limit',
+          quality: 'auto:good',
+          format: 'auto'
+        }
+      ]
     });
 
     return NextResponse.json({

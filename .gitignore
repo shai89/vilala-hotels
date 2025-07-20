@@ -52,3 +52,7 @@ next-env.d.ts
 /scripts/check-*.ts
 /scripts/add-*.ts
 /scripts/update-*.ts
+
+# Todo tracking files
+todos.md
+**/todos.md

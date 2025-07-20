@@ -1,6 +1,8 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 
 export async function getArticles() {
   try {
@@ -116,8 +118,34 @@ export async function getArticleBySlug(slug: string) {
   }
 }
 
-export async function createArticle(data: any, authorId: string) {
+export async function createArticle(data: any, authorId?: string) {
   try {
+    // Get session from server side
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.email) {
+      throw new Error('No authenticated user found')
+    }
+
+    // Use session user or provided authorId
+    let finalAuthorId = authorId || session.user.id || session.user.email
+
+    // If authorId looks like an email, find the user by email
+    if (finalAuthorId?.includes('@')) {
+      const user = await prisma.user.findUnique({
+        where: { email: finalAuthorId }
+      })
+      if (user) {
+        finalAuthorId = user.id
+      } else {
+        throw new Error('User not found with email: ' + finalAuthorId)
+      }
+    }
+
+    if (!finalAuthorId) {
+      throw new Error('Could not determine author ID')
+    }
+
     const newArticle = await prisma.article.create({
       data: {
         title: data.title,
@@ -128,7 +156,7 @@ export async function createArticle(data: any, authorId: string) {
         published: data.published || false,
         publishedAt: data.published ? new Date() : null,
         tags: JSON.stringify(data.tags || []),
-        authorId: authorId
+        authorId: finalAuthorId
       },
       include: {
         author: true,

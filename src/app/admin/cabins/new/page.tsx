@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createCabin } from '@/lib/actions/cabins'
+import { ImageUpload } from '@/components/admin/ImageUpload'
+import { ImageEditModal } from '@/components/admin/ImageEditModal'
 
 interface Room {
   id: string;
@@ -39,6 +41,8 @@ export default function AddCabinPage() {
   ]);
 
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [images, setImages] = useState<any[]>([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const amenitiesList = [
     'אינטרנט אלחוטי',
@@ -423,30 +427,15 @@ export default function AddCabinPage() {
                 תמונות המקום
               </h2>
               
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    הוסף תמונה
-                  </button>
-                  <span className="text-sm text-gray-500">קבלת 5 תמונות מהחופש</span>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm">העלה תמונות</button>
-                </div>
-
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-gray-500">
-                      עצרו כאן תמונות או גררו אותן כדי להעלות אותן<br />
-                      המגבול אומשת קבצים של עד 10MB כל תמונה
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <ImageUpload
+                entityType="cabin"
+                entityId="temp" // Will be updated after cabin creation
+                images={images}
+                onImagesChange={setImages}
+                maxImages={10}
+                allowBatchUpload={true}
+                onEditImage={setSelectedImageIndex}
+              />
             </div>
           </div>
 
@@ -483,6 +472,25 @@ export default function AddCabinPage() {
           </div>
         </div>
       </div>
+
+      {/* Image Edit Modal */}
+      {selectedImageIndex !== null && images[selectedImageIndex] && (
+        <ImageEditModal
+          image={images[selectedImageIndex]}
+          isOpen={selectedImageIndex !== null}
+          onClose={() => setSelectedImageIndex(null)}
+          onSave={(updatedImage) => {
+            setImages(prev => prev.map((img, index) => 
+              index === selectedImageIndex ? updatedImage : img
+            ));
+            setSelectedImageIndex(null);
+          }}
+          onDelete={(imageId) => {
+            setImages(prev => prev.filter(img => img.id !== imageId));
+            setSelectedImageIndex(null);
+          }}
+        />
+      )}
     </div>
   );
 }

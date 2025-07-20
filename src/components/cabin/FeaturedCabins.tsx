@@ -28,8 +28,8 @@ export function FeaturedCabins({ cabins }: FeaturedCabinsProps) {
     return (
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">צימרים מומלצים</h2>
-          <p className="text-gray-600">עדיין לא הוספנו צימרים מומלצים. חזרו בקרוב!</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-6">מקומות מומלצים</h2>
+          <p className="text-gray-600">עדיין לא הוספנו מקומות מומלצים. חזרו בקרוב!</p>
         </div>
       </section>
     );
@@ -41,10 +41,10 @@ export function FeaturedCabins({ cabins }: FeaturedCabinsProps) {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            צימרים מומלצים
+            מקומות מומלצים
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            גלו את הצימרים הפופולריים והמומלצים ביותר שלנו - מקומות מיוחדים שיעניקו לכם חוויה בלתי נשכחת
+            גלו את המקומות הפופולריים והמומלצים ביותר שלנו - מקומות מיוחדים שיעניקו לכם חוויה בלתי נשכחת
           </p>
         </div>
         
@@ -136,7 +136,7 @@ export function FeaturedCabins({ cabins }: FeaturedCabinsProps) {
             href="/cabins"
             className="inline-flex items-center px-8 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"
           >
-            צפה בכל הצימרים
+            צפה בכל המקומות
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

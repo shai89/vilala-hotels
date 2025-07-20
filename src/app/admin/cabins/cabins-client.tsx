@@ -30,6 +30,7 @@ interface CabinsClientProps {
 
 export function CabinsClient({ initialCabins }: CabinsClientProps) {
   const [selectedFilter, setSelectedFilter] = useState('כל המקומות')
+  const [selectedType, setSelectedType] = useState('כל הסוגים')
   const [searchTerm, setSearchTerm] = useState('')
   const [cabins, setCabins] = useState<Cabin[]>(initialCabins || [])
   const [filteredCabins, setFilteredCabins] = useState<Cabin[]>(initialCabins || [])
@@ -78,15 +79,45 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
       filtered = filtered.filter(cabin => cabin.region === selectedFilter)
     }
 
+    // Filter by type
+    if (selectedType !== 'כל הסוגים') {
+      filtered = filtered.filter(cabin => {
+        const cabinType = getCabinType(cabin)
+        return cabinType === selectedType
+      })
+    }
+
     setFilteredCabins(filtered)
-  }, [cabins, selectedFilter, searchTerm])
+  }, [cabins, selectedFilter, selectedType, searchTerm])
 
   const regions = Array.from(new Set(cabins.map(c => c.region)))
+
+  // Function to determine cabin type based on amenities and name
+  const getCabinType = (cabin: Cabin): string => {
+    const name = cabin.name.toLowerCase()
+    const amenities = cabin.amenities.map(a => a.toLowerCase())
+    
+    if (name.includes('וילה') || amenities.some(a => a.includes('בריכה') || a.includes('גינה'))) {
+      return 'וילה'
+    } else if (name.includes('לופט') || amenities.some(a => a.includes('מעלית') || a.includes('גג'))) {
+      return 'לופט'
+    } else if (name.includes('סוויטה') || amenities.some(a => a.includes('ג\'קוזי') || a.includes('יוקרה'))) {
+      return 'סוויטה'
+    } else if (amenities.some(a => a.includes('ג\'קוזי') || a.includes('רומנטי'))) {
+      return 'רומנטי'
+    } else if (cabin.maxGuests >= 6) {
+      return 'משפחתי'
+    } else {
+      return 'צימר'
+    }
+  }
+
+  const cabinTypes = Array.from(new Set(cabins.map(cabin => getCabinType(cabin))))
 
   return (
     <div className="flex-1 flex flex-col">
       {/* Top Header */}
-      <div className="bg-white shadow-sm p-6 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-200 p-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">ניהול מקומות</h1>
           <p className="text-gray-600 mt-1">צפה ונהל את כל המקומות במערכת</p>
@@ -174,7 +205,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
 
         {/* Search and Filter */}
         <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <input
                 type="text"
@@ -184,7 +215,7 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="w-48">
+            <div className="w-full lg:w-48">
               <select 
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
                 value={selectedFilter}
@@ -196,6 +227,32 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
                 ))}
               </select>
             </div>
+            <div className="w-full lg:w-48">
+              <select 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+              >
+                <option>כל הסוגים</option>
+                {cabinTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={() => {
+                setSearchTerm('')
+                setSelectedFilter('כל המקומות')
+                setSelectedType('כל הסוגים')
+              }}
+              className={`w-full lg:w-auto px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium ${
+                (searchTerm || selectedFilter !== 'כל המקומות' || selectedType !== 'כל הסוגים') 
+                  ? 'visible' 
+                  : 'invisible pointer-events-none'
+              }`}
+            >
+              נקה מסננים
+            </button>
           </div>
         </div>
 
@@ -233,7 +290,19 @@ export function CabinsClient({ initialCabins }: CabinsClientProps) {
               {/* Cabin Details */}
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 text-lg">{cabin.name}</h3>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                        {getCabinType(cabin)}
+                      </span>
+                      {cabin.featured && (
+                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
+                          מומלץ
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-lg">{cabin.name}</h3>
+                  </div>
                   <div className="flex items-center gap-1">
                     <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />

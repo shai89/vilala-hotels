@@ -129,14 +129,16 @@ export function BlogClient({ articles }: BlogClientProps) {
           </div>
 
           {/* Clear Filters Button */}
-          {(searchTerm || selectedTag) && (
-            <button
-              onClick={clearFilters}
-              className="w-full lg:w-auto px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-            >
-              נקה מסננים
-            </button>
-          )}
+          <button
+            onClick={clearFilters}
+            className={`w-full lg:w-auto px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium ${
+              (searchTerm || selectedTag) 
+                ? 'visible' 
+                : 'invisible pointer-events-none'
+            }`}
+          >
+            נקה מסננים
+          </button>
         </div>
 
         {/* Tag Pills */}

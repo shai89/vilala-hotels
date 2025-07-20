@@ -20,6 +20,8 @@ export async function generateMetadata({ params }: CabinPageProps) {
     };
   }
 
+  const coverImage = cabin.images.find(img => img.is_cover) || cabin.images[0];
+
   return {
     title: `${cabin.name} | Vilala - צימרים מדהימים`,
     description: cabin.description || `${cabin.name} ב${cabin.city}, ${cabin.region}. הזמן עכשיו!`,
@@ -27,7 +29,12 @@ export async function generateMetadata({ params }: CabinPageProps) {
     openGraph: {
       title: `${cabin.name} | Vilala`,
       description: cabin.description || `${cabin.name} ב${cabin.city}, ${cabin.region}`,
-      images: cabin.images.length > 0 ? [cabin.images[0].url] : [],
+      images: coverImage ? [{
+        url: coverImage.url,
+        width: coverImage.width,
+        height: coverImage.height,
+        alt: coverImage.alt || cabin.name,
+      }] : [],
       type: 'website',
       locale: 'he_IL'
     }
