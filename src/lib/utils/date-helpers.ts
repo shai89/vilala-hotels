@@ -23,7 +23,7 @@ export function getNextWeekendDates(): WeekendDates {
   const currentDay = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
   
   // Calculate days to next Thursday
-  let daysToThursday: number;
+  let daysToThursday: number = 0;
   
   if (currentDay === 0) { // Sunday
     daysToThursday = 4;

@@ -48,8 +48,10 @@ export async function GET(request: Request) {
     return NextResponse.json(cabins);
   } catch (error) {
     console.error('Error fetching cabins:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
-    return NextResponse.json({ error: 'Failed to fetch cabins', details: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Error details:', errorMessage);
+    if (errorStack) console.error('Error stack:', errorStack);
+    return NextResponse.json({ error: 'Failed to fetch cabins', details: errorMessage }, { status: 500 });
   }
 }

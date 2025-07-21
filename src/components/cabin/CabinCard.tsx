@@ -47,7 +47,7 @@ export function CabinCard({ cabin }: CabinCardProps) {
         <Image
           src={coverImage}
           alt={coverImageObj?.alt || cabin.name}
-          title={coverImageObj?.title || cabin.name}
+          title={coverImageObj?.alt || cabin.name}
           fill
           className="object-cover hover:scale-105 transition-transform duration-300"
         />

@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { getOptimizedImageUrl } from '@/lib/utils/image-optimization';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -82,9 +83,9 @@ export async function uploadToCloudinary(
     // Add auto-enhancement if enabled
     if (rules.autoEnhance) {
       baseTransformations.push(
-        { effect: 'auto_contrast' },
-        { effect: 'auto_color' },
-        { effect: 'sharpen:50' }
+        { effect: 'auto_contrast' } as any,
+        { effect: 'auto_color' } as any,
+        { effect: 'sharpen:50' } as any
       );
     }
 

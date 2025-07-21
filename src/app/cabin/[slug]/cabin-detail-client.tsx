@@ -109,8 +109,8 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
     image: cabin.images.map(img => ({
       "@type": "ImageObject",
       url: img.url,
-      caption: img.alt || img.title,
-      description: img.description
+      caption: img.alt,
+      description: img.alt
     })),
     starRating: {
       "@type": "Rating",
@@ -132,7 +132,7 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
         <Image
           src={cabin.images[selectedImageIndex]?.url || '/placeholder-cabin.jpg'}
           alt={cabin.images[selectedImageIndex]?.alt || cabin.name}
-          title={cabin.images[selectedImageIndex]?.title || cabin.name}
+          title={cabin.images[selectedImageIndex]?.alt || cabin.name}
           fill
           className="object-cover"
           priority
@@ -171,7 +171,7 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
                 <Image
                   src={image.url}
                   alt={image.alt || `${cabin.name} תמונה ${index + 1}`}
-                  title={image.title || `${cabin.name} תמונה ${index + 1}`}
+                  title={image.alt || `${cabin.name} תמונה ${index + 1}`}
                   fill
                   className="object-cover"
                 />
@@ -203,11 +203,11 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
                   </div>
                   <div>
                     <strong className="text-sm text-gray-600">Title:</strong>
-                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].title || 'Not set'}</p>
+                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].alt || 'Not set'}</p>
                   </div>
                   <div>
                     <strong className="text-sm text-gray-600">Description:</strong>
-                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].description || 'Not set'}</p>
+                    <p className="text-sm mt-1">{cabin.images[selectedImageIndex].alt || 'Not set'}</p>
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t">
@@ -529,7 +529,7 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
               <Image
                 src={cabin.images[selectedImageIndex]?.url || '/placeholder-cabin.jpg'}
                 alt={cabin.images[selectedImageIndex]?.alt || cabin.name}
-                title={cabin.images[selectedImageIndex]?.title || cabin.name}
+                title={cabin.images[selectedImageIndex]?.alt || cabin.name}
                 fill
                 className="object-contain"
                 priority
@@ -583,11 +583,11 @@ export function CabinDetailClient({ cabin }: CabinDetailClientProps) {
             </div>
 
             {/* Image Info */}
-            {cabin.images[selectedImageIndex]?.title && (
+            {cabin.images[selectedImageIndex]?.alt && (
               <div className="absolute bottom-20 left-4 right-4 bg-black bg-opacity-50 text-white p-4 rounded-lg">
-                <h3 className="font-semibold">{cabin.images[selectedImageIndex].title}</h3>
-                {cabin.images[selectedImageIndex]?.description && (
-                  <p className="text-sm mt-1 opacity-90">{cabin.images[selectedImageIndex].description}</p>
+                <h3 className="font-semibold">{cabin.images[selectedImageIndex].alt}</h3>
+                {cabin.images[selectedImageIndex]?.alt && (
+                  <p className="text-sm mt-1 opacity-90">{cabin.images[selectedImageIndex].alt}</p>
                 )}
               </div>
             )}
